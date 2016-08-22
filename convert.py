@@ -21,16 +21,20 @@
 from mutagen.easyid3 import EasyID3
 from mutagen.mp3 import MP3
 from mutagen.mp4 import MP4
+from mutagen.mp4 import MP4Cover
 import audioread
 import time
 import os
 import subprocess
+
+bitrate = '128'
 
 # output dir
 os.mkdir("output")
 
 # check for cover file
 album_covers = [filename for filename in os.listdir(".") if filename.endswith(('.jpg', '.jpeg', '.png'))]
+album_covers.sort()
 
 # get mp3
 mp3_files = [filename for filename in os.listdir(".") if filename.endswith(".mp3")]
@@ -109,7 +113,14 @@ os.remove("output_MP3WRAP.mp3")
 audio = MP4("output.mp4")
 audio["\xa9nam"] = [album_title]
 audio["\xa9ART"] = [artist]
-audio["covr"] =MP4.MP4Cover()
+
+for cover in album_covers:
+    image_type = 13
+    if "png" in cover:
+        image_type = 14
+
+    audio["covr"] = MP4Cover(cover, image_type)
+
 audio.save()
 
 os.rename("output.mp4", "%s - %s.m4b" % (artist, album_title))
